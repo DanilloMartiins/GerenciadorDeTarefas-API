@@ -22,6 +22,7 @@ public class BoardService {
             throw new ValidationException("Nome do board é obrigatório.");
         }
 
+        // O serviço gera o identificador para evitar colisão entre clientes.
         Board board = new Board(UUID.randomUUID(), command.name().trim());
         return boardRepository.save(board);
     }
@@ -43,8 +44,10 @@ public class BoardService {
             throw new ValidationException("Título da tarefa é obrigatório.");
         }
 
+        // Nova tarefa sempre nasce em TODO (regra definida na entidade Task).
         Task task = new Task(UUID.randomUUID(), command.title().trim(), safeTrim(command.description()), command.dueDate());
         board.addTask(task);
+        // Mesmo em memória, persiste explicitamente para manter a semântica de repositório.
         boardRepository.save(board);
         return task;
     }
@@ -64,6 +67,7 @@ public class BoardService {
             throw new ValidationException("Novo status da tarefa é obrigatório.");
         }
 
+        // Centraliza a regra de transição para manter consistência entre chamadas.
         validateStatusTransition(task.getStatus(), command.status());
         task.changeStatus(command.status());
         boardRepository.save(board);

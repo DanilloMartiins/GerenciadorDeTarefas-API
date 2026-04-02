@@ -34,10 +34,12 @@ public class ApiHandler implements HttpHandler {
         try (exchange) {
             String method = exchange.getRequestMethod();
             String path = exchange.getRequestURI().getPath();
+            // Ex.: "/boards/{id}/tasks" -> ["boards", "{id}", "tasks"].
             List<String> segments = Arrays.stream(path.split("/"))
                     .filter(segment -> !segment.isBlank())
                     .toList();
 
+            // Roteamento manual por método + quantidade/valor dos segmentos.
             if (isHealthRoute(method, segments)) {
                 writeJson(exchange, HttpURLConnection.HTTP_OK, "API online");
                 return;
@@ -78,12 +80,15 @@ public class ApiHandler implements HttpHandler {
 
             writeError(exchange, HttpURLConnection.HTTP_NOT_FOUND, "Rota não encontrada.");
         } catch (ValidationException e) {
+            // Erros de regra/entrada inválida retornam 400.
             writeError(exchange, HttpURLConnection.HTTP_BAD_REQUEST, e.getMessage());
         } catch (NotFoundException e) {
+            // Ausência de recurso retorna 404.
             writeError(exchange, HttpURLConnection.HTTP_NOT_FOUND, e.getMessage());
         } catch (IllegalArgumentException e) {
             writeError(exchange, HttpURLConnection.HTTP_BAD_REQUEST, "Formato de UUID inválido.");
         } catch (Exception e) {
+            // Fallback para qualquer erro não mapeado.
             writeError(exchange, HttpURLConnection.HTTP_INTERNAL_ERROR, "Erro interno da API.");
         }
     }

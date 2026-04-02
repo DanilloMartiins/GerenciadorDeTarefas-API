@@ -14,7 +14,9 @@ public class App {
         int port = resolvePort(args);
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
+        // Monta as dependências manualmente (sem framework de injeção).
         BoardService boardService = new BoardService(new InMemoryBoardRepository());
+        // Todo tráfego HTTP entra por este handler e é roteado por path/método.
         server.createContext("/", new ApiHandler(boardService));
         server.setExecutor(Executors.newFixedThreadPool(8));
         server.start();

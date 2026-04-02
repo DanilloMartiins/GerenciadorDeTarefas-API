@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public final class JsonUtil {
+    // Configuração única do Jackson para toda a API.
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -22,6 +23,7 @@ public final class JsonUtil {
     public static <T> T fromBody(InputStream body, Class<T> targetClass) throws IOException {
         byte[] bytes = body.readAllBytes();
         if (bytes.length == 0) {
+            // Permite body vazio para rotas que tratam ausência de payload.
             return null;
         }
         return MAPPER.readValue(bytes, targetClass);
